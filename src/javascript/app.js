@@ -14,6 +14,7 @@ Ext.define("TSPortfolioKanbanAlternateFieldApp", {
         'Rally.clientmetrics.ClientMetricsRecordable',
         'Rally.ui.gridboard.plugin.GridBoardCustomFilterControl',
         'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
+        'Rally.ui.gridboard.plugin.GridBoardSharedViewControl',
         'Rally.ui.cardboard.plugin.FixedHeader'
     ],
     mixins: [
@@ -180,6 +181,15 @@ Ext.define("TSPortfolioKanbanAlternateFieldApp", {
                     boardFieldDefaults: this.getSetting('cardFields').split(',')
                 },
                 {
+//                    ptype: 'rallygridboardsharedviewcontrol',
+//                    headerPosition: 'left',
+//                    sharedViewConfig: {
+//                        stateful: true,
+//                        stateId: context.getScopedStateId('custom-list-shared-view'),
+//                        enableUrlSharing: this.isFullPageApp !== false
+//                    }
+//               },
+//                {
                     ptype: 'rallyboardpolicydisplayable',
                     prefKey: 'kanbanAgreementsChecked',
                     checkboxConfig: {
@@ -194,6 +204,15 @@ Ext.define("TSPortfolioKanbanAlternateFieldApp", {
             },
             height: height
         };
+    },
+    _hasViewSelected: function() {
+        var sharedViewConfig = this.getSharedViewConfig().sharedViewConfig;
+        if (sharedViewConfig && sharedViewConfig.stateId) {
+            var value = (Ext.state.Manager.get(sharedViewConfig.stateId) || {}).value;
+
+            return !_.isEmpty(value);
+        }
+        return false;
     },
 
     _getColumnConfig: function(columnSetting) {
@@ -293,6 +312,7 @@ Ext.define("TSPortfolioKanbanAlternateFieldApp", {
         return config;
     },
 
+
     _getFilters: function() {
         var filters = [];
         if(this.getSetting('query')) {
@@ -301,6 +321,22 @@ Ext.define("TSPortfolioKanbanAlternateFieldApp", {
         if(this.getContext().getTimeboxScope()) {
             filters.push(this.getContext().getTimeboxScope().getQueryFilter());
         }
+        var owners = this.getSetting('Owners');
+        var ofilter = [];
+        if(owners != "") {
+            _.each(owners.split(','), function(userid, i) {
+                if(userid === 'none') userid = "";
+                var o = Ext.create('Rally.data.wsapi.Filter', {
+                    property: 'Owner.UserName',
+                    operator: '=',
+                    value: userid
+                });
+                ofilter.push(o);
+            });
+            var ofilters = Rally.data.wsapi.Filter.or(ofilter);
+            filters.push(ofilters);
+        }
+console.log(filters.toString());
         return filters;
     },
 

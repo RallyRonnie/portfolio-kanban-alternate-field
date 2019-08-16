@@ -94,7 +94,17 @@ Ext.define('Rally.apps.kanban.Settings', {
                 bubbleEvents: 'columnsettingsready'
             }
         ];
-
+        items.push({name: 'Label1', xtype: 'label', text: 'Enter a "," seperated list of userIDs (email) with no spaces. Add "none" to the list to include tasks with NO Owner.'}
+        );
+        items.push({
+			name: 'Owners',
+			xtype: 'textareafield',
+			label: "Owner List",
+			grow: true,
+            width: 500,
+            height: 100
+//            autoScroll: true
+		});
         items.push({
             name: 'groupHorizontallyByField',
             xtype: 'rowsettingsfield',
